@@ -1,0 +1,9 @@
+[package]
+name = "spotify-consume"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+spotify-lib = { path = "../" }
+uuid = {version="1.10.0", features = ["v4", "fast-rng"]}
+tokio = { version = "1", features = ["full"] }

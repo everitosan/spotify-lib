@@ -1,0 +1,14 @@
+[package]
+name = "spotify-lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = {version="1.0.210", features = ["derive"]}
+serde_json = "1.0.128"
+reqwest = {version="0.12.8", features = ["json"]}
+dotenvy = "0.15.7"
+thiserror = "1.0.64"
+validator = { version = "0.18", features = ["derive"] }
+uuid = {version="1.10.0", features = ["v4", "fast-rng"]}
+base64 = "0.22.1"
