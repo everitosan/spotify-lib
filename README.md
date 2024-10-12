@@ -2,6 +2,12 @@
 
 Unofficial spotify lib for rust
 
+## Installation
+```toml
+[dependencies]
+spotify-lib = { git="https://github.com/everitosan/spotify-lib", version="0.1.0" }
+```
+
 ### Use
 
 ```rust
