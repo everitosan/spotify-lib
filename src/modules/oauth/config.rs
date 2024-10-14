@@ -1,7 +1,10 @@
 use dotenvy;
 use std::env;
-use crate::errors::{Error, Result};
+use std::collections::HashMap;
+use super::utils::callback;
+
 use validator::Validate;
+use crate::errors::{Error, Result};
 
 #[derive(Debug, Validate)]
 pub struct ClientConfig {
@@ -9,9 +12,9 @@ pub struct ClientConfig {
   pub client_id: String,
   #[validate(length(min = 5, message = "ClientConfig property seems to bee to small"))]
   pub secret: String,
-  #[validate(url(message = "ClientConfig property is not a valid url"))]
-  pub callback_url: String
+  pub callback_urls: HashMap<String, String> 
 }
+
 
 impl ClientConfig {
  
@@ -25,21 +28,38 @@ impl ClientConfig {
       return Err(Error::ConfigError(format!("{}", e)));
     }
 
+    let callbacks = match env::var("SPOTIFY_CALLBACK") {
+      Ok(single) => { single },
+      Err(_) => {
+        env::var("SPOTIFY_CALLBACKS").expect("SPOTIFY_CALLBACK or SPOTIFY_CALLBACKS should be defined")
+      }
+    };
+
+    if callbacks.is_empty() {
+      panic!("SPOTIFY_CALLBACK or SPOTIFY_CALLBACKS should be defined");
+    }
+
     let config = ClientConfig{
       client_id: env::var("SPOTIFY_CLIENT_ID").expect("missing SPOTIFY_CLIENT_ID"),
       secret: env::var("SPOTIFY_SECRET").expect("missing SPOTIFY_SECRET"),
-      callback_url: env::var("SPOTIFY_CALLBACK").expect("missing SPOTIFY_CALLBACK")
+      callback_urls: callback::parse(&callbacks)
     };
 
-    config.check()
-  }
-
-  fn check(self) -> Result<Self> {
-    match self.validate() {
-      Ok(_) => Ok(self),
-      Err(e) => Err(Error::ConfigError( format!("{}", e)))
+    match config.validate() {
+      Ok(_) => {Ok(config)},
+      Err(e) => {
+        Err(Error::ConfigError(e.to_string()))
+      }
     }
   }
+
+  pub fn get_callback_by_key(&self, key: &'static str) -> String {
+    match self.callback_urls.get(key) {
+      Some(u) => {u.clone()},
+      None => { format!("--!!NEED TO REGISTER {} CALLBALCK!!--", key) }
+    }
+  }
+
 
 }
 
@@ -51,25 +71,15 @@ mod test {
   #[test]
   #[should_panic]
   fn test_read_from_missing_env() {
-    // shoyuld panic as file does not exists
+    // should panic as file does not exists
     ClientConfig::from_env_file("missing.file").unwrap();
   }
 
   #[test]
+  #[should_panic]
   fn test_validates_callback() {
-    match ClientConfig::from_env_file(".env.wrong_callback") {
-      Ok(config) => {
-        panic!("check callback validation: {:?}", config);
-      },
-      Err(e) => {
-        match e {
-          Error::ConfigError(msg) => {
-            assert_eq!(msg, "callback_url: ClientConfig property is not a valid url");
-          },
-          _ =>  { panic!("validation type differ from ConfigError") }
-        }
-      }
-    };
+    // shoyuld panic askey is not defined
+    ClientConfig::from_env_file(".env.wrong_callback").unwrap();
   }
 
 }

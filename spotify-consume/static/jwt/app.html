@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application</title>
+</head>
+<body>
+
+  <h1> Spotify-lib </h1>
+
+  <div>
+    <h2>[JWT] - method </h2>
+    <p>
+      As the jwt is in memory we can retrieve info directly from spotify.
+    </p>
+    <hr>
+    <p> Get user info </p>
+    <button onclick="getUserInfo()" > Get User Info </button>
+    <div id="UserInfo" > </div>
+    <hr>
+    <button onclick="getPlaylist()" > Get Playlists </button>
+    <div id="Playlist" > </div>
+  </div>
+
+  
+  <script type="text/javascript" >
+    let tkn = ""
+    let userId = ""
+    try {
+      const rawTkn = localStorage.getItem("tkn")
+      tkn = JSON.parse(rawTkn)
+      sessionStorage.removeItem("tkn")
+    } catch (e) {
+      window.location.href = "/"
+    }
+
+    function getUserInfo() {
+      fetch("https://api.spotify.com/v1/me", {
+        headers: {
+          "Authorization": `${tkn.token_type} ${tkn.access_token}`,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        let container = document.getElementById("UserInfo")
+        container.innerHTML = ""
+
+        let nameC = document.createElement("h3")
+        nameC.innerHTML = JSON.stringify(data.display_name)
+
+
+        let IdC = document.createElement("p")
+        IdC.innerHTML = JSON.stringify(data.id)
+        userId = data.id
+
+        let emailC = document.createElement("p")
+        emailC.innerHTML = JSON.stringify(data.email)
+
+        let procuctC = document.createElement("p")
+        procuctC.innerHTML = JSON.stringify(data.product)
+
+        let image = document.createElement("img")
+        image.src = data.images[1].url
+
+        container.appendChild(nameC)
+        container.appendChild(IdC)
+        container.appendChild(emailC)
+        container.appendChild(procuctC)
+        container.appendChild(image)
+      })
+    }
+
+    function getPlaylist() {
+      fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+        headers: {
+          "Authorization": `${tkn.token_type} ${tkn.access_token}`,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then( data => {
+        console.log(data)
+        let container = document.getElementById("Playlist")
+
+        const list = document.createElement("ul")
+        data.items.forEach((item) => {
+          const li = document.createElement("li")
+          li.innerHTML = `[${item.id}] ${item.name}`
+          list.appendChild(li)
+        })
+
+        container.append(list)
+      })
+    }
+
+  </script>
+  
+</body>
+</html>

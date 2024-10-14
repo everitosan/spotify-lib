@@ -10,3 +10,9 @@ pub struct SpotifyToken {
   pub scope: String
 }
 
+impl SpotifyToken {
+  pub fn to_string(&self) -> String {
+    serde_json::to_string(self).unwrap()
+  }
+}
+

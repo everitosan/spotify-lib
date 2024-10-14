@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spotify Login</title>
+</head>
+<body>
+
+  <h1>
+    Example of spotify-lib in action!!
+  </h1>
+
+  <p>
+    Click start button to get redirected to spotify login web page.
+  </p>
+
+
+  <button onclick="redirect('jwt')" > Jwt flow </button>
+  <button onclick="redirect('cookie')" > Cookie flow </button>
+  
+
+<script type="text/javascript" >
+  function redirect(auth_method) {
+    window.location.href = `/oauth/redirect/${auth_method}`
+  }
+</script>
+  
+</body>
+</html>
